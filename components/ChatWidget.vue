@@ -18,10 +18,40 @@ const messages = ref<Message[]>([]);
 
 const usersTyping = ref<User[]>([]);
 
-// send messages to Chat API here
-// and in the empty function below
+const messagesForApi = computed(() => {
+  return messages.value.map((message) => ({
+    role: message.userId,
+    content: message.text,
+  }));
+});
 
-async function handleNewMessage(message: Message) {}
+// send messages to Chat API here
+async function handleNewMessage(message: Message) {
+  messages.value.push(message);
+  usersTyping.value.push(bot.value);
+  const res = await $fetch("/api/ai", {
+    method: "POST",
+    body: {
+      messages: messagesForApi.value,
+    },
+  });
+
+  console.log(res);
+
+  if (!res.choices[0]?.message?.content) {
+    return;
+  }
+
+  const msg: Message = {
+    id: res.id,
+    userId: bot.value.id,
+    text: res.choices[0]?.message?.content,
+    createdAt: new Date(),
+  };
+
+  messages.value.push(msg);
+  usersTyping.value = [];
+}
 </script>
 <template>
   <ChatBox
