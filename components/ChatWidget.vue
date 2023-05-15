@@ -18,12 +18,14 @@ const messages = ref<Message[]>([]);
 
 const usersTyping = ref<User[]>([]);
 
-const messagesForApi = computed(() => {
-  return messages.value.map((message) => ({
-    role: message.userId,
-    content: message.text,
-  }));
-});
+const messagesForApi = computed(() =>
+  messages.value
+    .map((message) => ({
+      role: message.userId,
+      content: message.text,
+    }))
+    .slice(-5)
+);
 
 // send messages to Chat API here
 async function handleNewMessage(message: Message) {
